@@ -1,0 +1,11 @@
+version = 0.1
+[default.deploy.parameters]
+stack_name = "mimic-rw-dynamodb"
+resolve_s3 = true
+s3_prefix = "mimic-rw-dynamodb"
+region = "eu-central-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+disable_rollback = true
+parameter_overrides = "DynamoUseLocal=\"false\" MimicTable=\"mimic-sam-rw\" Env=\"dev\""
+image_repositories = []

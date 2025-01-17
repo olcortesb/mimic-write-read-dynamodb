@@ -1,0 +1,23 @@
+{
+  "name": "lambdas-src",
+  "version": "1.0.0",
+  "description": "Lambda base template for test pipeline",
+  "main": "eslint.config.js",
+  "type": "module",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gitlab.com/serverless4741110/lambdas-src.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/serverless4741110/lambdas-src/issues"
+  },
+  "homepage": "https://gitlab.com/serverless4741110/lambdas-src#readme"
+}

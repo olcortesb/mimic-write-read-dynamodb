@@ -1,0 +1,113 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: mimic-sam-rw-dynamodb
+
+Parameters:
+  DynamoUseLocal:
+    Type: String
+    Default: "false"
+    Description: For local development
+  MimicTable:
+    Type: String
+    Default: mimic-sam-rw
+    Description: LoginTicket table name
+  Env:
+    Type: String
+    AllowedValues:
+      - dev
+      - stagin
+      - prod
+    Default: dev
+    Description: Environment in which the application will be deployed.
+
+Globals:
+  Function:
+    Runtime: nodejs18.x
+    Timeout: 40
+    MemorySize: 256
+    Environment:
+      Variables:
+        DYNAMO_DB_USE_LOCAL: false
+        DYNAMO_DB_REGION: eu-central-1
+        MIMIC_TABLE: !Ref MimicTable
+
+Resources:
+  samimicApi:
+    Type: 'AWS::Serverless::Api'
+    Properties:
+      StageName: !Ref Env
+      Auth:
+        ApiKeyRequired: true
+        UsagePlan:
+          CreateUsagePlan: PER_API
+          Description: Usage plan for this API # sets for all methods
+#      Auth:
+#        DefaultAuthorizer: JWTCustomAuthorizer
+#        Authorizers:
+#          JWTCustomAuthorizer:
+#            FunctionPayloadType: TOKEN
+#            FunctionArn: !GetAtt JWTAuthFunction.Arn
+
+#  JWTAuthFunction:
+#    Type: AWS::Serverless::Function
+#    Properties:
+#      CodeUri: src/
+#      Handler: jwt-auth.lambdaHandler
+#      Runtime: nodejs18.x
+#      Policies:
+#        - AmazonDynamoDBFullAccess
+#      Architectures:
+#        - x86_64
+
+  SamTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: id
+        Type: String
+      TableName: !Ref MimicTable
+
+  SamListensFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: src/
+      Handler: mimicListens.lambdaHandler
+      Runtime: nodejs18.x
+      Policies:
+        - AmazonDynamoDBFullAccess
+      Architectures:
+        - x86_64
+      Events:
+        SecondPhone:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            RestApiId: !Ref samimicApi
+            Path: /mimic
+            Method: post
+            Auth:
+              ApiKeyRequired: true
+
+  SamResponseFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: src/
+      Handler: mimicResponse.lambdaHandler
+      Runtime: nodejs18.x
+      Policies:
+        - AmazonDynamoDBFullAccess
+      Architectures:
+        - x86_64
+      Events:
+        SecondPhone:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            RestApiId: !Ref samimicApi
+            Path: /mimic/{id}
+            Method: get
+            Auth:
+              ApiKeyRequired: true
+
+Outputs:
+  ProdDataEndpoint:
+    Description: "API Prod stage endpoint"
+    Value: !Sub "https://${samimicApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
