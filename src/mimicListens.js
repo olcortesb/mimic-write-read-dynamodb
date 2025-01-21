@@ -8,7 +8,7 @@ exports.lambdaHandler = async (event, context) => {
         const { path, queryStringParameters, headers, body } = event;
 
         const objectBody = JSON.parse(body);
-        await schemaValidate(SCHEMAS_NAMES.IN, objectBody);
+        //await schemaValidate(SCHEMAS_NAMES.IN, objectBody);
 
         const id = await dynamoService.createBodyResponse(objectBody);
 

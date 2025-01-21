@@ -10,7 +10,7 @@ exports.lambdaHandler = async (event, context) => {
         const id = pathParameters.id;
         const bodyResponse = await dynamoService.getBodyResponse(id);
 
-        await schemaValidate(SCHEMAS_NAMES.OUT, bodyResponse);
+        //await schemaValidate(SCHEMAS_NAMES.OUT, bodyResponse);
 
         return {
             'statusCode': 200,
